@@ -1,4 +1,18 @@
 .DS_Store
+aerosol 1.gltf
+aerosol 2.gltf
+album.gltf
+album 2.gltf
+camara.gltf
+casa_fer.gltf
+computadora.gltf
+disco.gltf
+lampara.gltf
+libro.gltf
+pincel solo.gltf
+plano.gltf
+vaso pinceles.gltf
+venatanas.gltf
 
 # Logs
 logs
@@ -139,3 +153,5 @@ dist
 # Vite logs files
 vite.config.js.timestamp-*
 vite.config.ts.timestamp-*
+
+.vercel
