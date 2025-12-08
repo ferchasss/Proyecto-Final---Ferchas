@@ -455,6 +455,70 @@ gltfLoader.load('/models/Casa/plano.gltf',
 
 
 /**
+ * Audio Setup
+ */
+// Crear listener de audio (se adjunta a la cámara)
+const listener = new THREE.AudioListener();
+camera.add(listener);
+
+// Crear fuente de audio
+const sound = new THREE.Audio(listener);
+
+// Cargar archivo de audio con debug completo
+const audioLoader = new THREE.AudioLoader(manager);
+audioLoader.load(
+    './assets/audio/musica.mp3',
+    // onLoad
+    function(buffer) {
+        console.log('✅ Audio buffer cargado:', buffer);
+        sound.setBuffer(buffer);
+        sound.setLoop(true);
+        sound.setVolume(0.5); // subir volumen para prueba
+        console.log('✅ Audio configurado - listo para reproducir');
+    },
+    // onProgress
+    function(xhr) {
+        console.log('🎵 Cargando audio:', (xhr.loaded / xhr.total * 100).toFixed(2) + '%');
+    },
+    // onError
+    function(error) {
+        console.error('❌ ERROR cargando audio:', error);
+        console.error('❌ Verifica que existe: ./assets/audio/musica.mp3');
+    }
+);
+
+// Función para iniciar música con debug
+function playMusic() {
+    console.log('🎵 playMusic() llamada');
+    console.log('   sound.buffer existe:', !!sound.buffer);
+    console.log('   sound.isPlaying:', sound.isPlaying);
+    console.log('   listener conectado:', listener.context.state);
+    
+    if (sound.buffer && !sound.isPlaying) {
+        try {
+            sound.play();
+            console.log('✅ Música REPRODUCIENDO');
+        } catch(e) {
+            console.error('❌ Error al reproducir:', e);
+        }
+    } else if (!sound.buffer) {
+        console.warn('⚠️ Audio aún no está cargado');
+    } else if (sound.isPlaying) {
+        console.log('ℹ️ Música ya está sonando');
+    }
+}
+
+// Fallback: reproducir con cualquier click
+let musicAttempted = false;
+canvas.addEventListener('click', () => {
+    if (!musicAttempted && sound.buffer) {
+        console.log('🖱️ Click detectado - intentando reproducir música');
+        playMusic();
+        musicAttempted = true;
+    }
+});
+
+/**
  * Animate
  */
 const clock = new THREE.Clock()
@@ -508,23 +572,17 @@ function loadGSAP(callback) {
 function startIntroAnimation() {
     loadGSAP(() => {
         const gsapLib = window.gsap
-        
         controls.enabled = false
         
-        // POSICIÓN 1 (INICIAL - ARRIBA EN EL CIELO): es donde comienza la animación
         const startPos = new THREE.Vector3(9, 15, 5)
-        const startTarget = new THREE.Vector3(9, 8, 0.5)  // mirando hacia arriba/cielo
+        const startTarget = new THREE.Vector3(9, 8, 0.5)
+        const endPos = new THREE.Vector3(1, 4, -10)
+        const endTarget = new THREE.Vector3(-1, 1, 2)
         
-        // POSICIÓN 2 (FINAL - cámara ENFRENTE de la casa)
-        const endPos = new THREE.Vector3(1, 4, -10)   // x igual al centro de la casa, z negativo = al frente
-        const endTarget = new THREE.Vector3(-1, 1, 2) // lookAt al centro/entrada de la casa
-        
-        // Posicionar cámara INMEDIATAMENTE en la posición inicial (arriba en el cielo)
         camera.position.copy(startPos)
         camera.lookAt(startTarget)
         controls.target.copy(startTarget)
         
-        // Esperar 1 segundo, luego animar hacia la posición final durante 3 segundos
         setTimeout(() => {
             gsapLib.to(camera.position, {
                 x: endPos.x,
@@ -533,18 +591,19 @@ function startIntroAnimation() {
                 duration: 3,
                 ease: 'power2.inOut',
                 onUpdate: () => {
-                    // Interpolar también el target para transición suave
                     controls.target.lerp(endTarget, 0.05)
                     camera.lookAt(controls.target)
                     controls.update()
                 },
                 onComplete: () => {
-                    // Fijar target final
                     controls.target.copy(endTarget)
                     controls.enabled = true
+                    
+                    // Reproducir música aquí si la añadiste
+                    // playMusic();
                 }
             })
-        }, 1000)  // Espera 1 segundo antes de animar
+        }, 1000)
     })
 }
 
