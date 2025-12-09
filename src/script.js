@@ -1,9 +1,10 @@
 import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js' // ← AÑADIR ESTA LÍNEA
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js'
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js'
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js'
 console.log(GLTFLoader);
 
 /**
@@ -134,14 +135,26 @@ const bloomPass = new UnrealBloomPass(new THREE.Vector2(sizes.width, sizes.heigh
 composer.addPass(bloomPass)
 
 /**
- * Loaders (CON manager asignado)
+ * Loaders con Draco
  */
+// 1. Configurar DRACOLoader primero
+const dracoLoader = new DRACOLoader(manager);
+// Probar con versión alternativa del decoder
+dracoLoader.setDecoderPath('https://www.gstatic.com/draco/v1/decoders/');
+dracoLoader.setDecoderConfig({ type: 'js' }); // Forzar JS decoder
+dracoLoader.preload();
+console.log('✅ DRACOLoader configurado');
+
+// 2. Configurar GLTFLoader con soporte Draco
 const gltfLoader = new GLTFLoader(manager);
+gltfLoader.setDRACOLoader(dracoLoader);
+console.log('✅ GLTFLoader configurado con Draco');
+
 const loader = new THREE.TextureLoader(manager);
-const cubeTexLoader = new THREE.CubeTextureLoader(manager);
+const cubeTextureLoader = new THREE.CubeTextureLoader(manager);
 
 // Cargar environment map
-const envMap = cubeTexLoader.load([
+const envMap = cubeTextureLoader.load([
    './assets/texturas/posx.jpg', './assets/texturas/negx.jpg',
    './assets/texturas/posy.jpg', './assets/texturas/negy.jpg',
    './assets/texturas/posz.jpg', './assets/texturas/negz.jpg'
