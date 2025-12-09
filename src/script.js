@@ -68,7 +68,7 @@ directionalLight.position.set(5, 5, 5)
 scene.add(directionalLight)
 
 // const frontLight = new THREE.PointLight("#cec6bfff", 10, 100);
-// frontLight.position.set(7, 3, 3);
+// frontLight.position.set(-2, 3, 8);
 // scene.add(frontLight);
 
 const rimLight = new THREE.PointLight("#dcb494ff", 10, 100);
